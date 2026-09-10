@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --color-obsidian: #0B0C10;
+  --color-obsidian-light: #12141A;
+  --color-slate: #1F2833;
+  --color-slate-light: #2A3441;
+  --color-gold: #D4AF37;
+  --color-gold-light: #E8C94A;
+  --color-gold-dim: #B8962E;
+  --color-ivory: #F4F4F6;
+  --color-ivory-dim: #C8C8CC;
+
+  --font-display: "Cinzel", "Inter", serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: #0B0C10;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #0B0C10;
+    color: #F4F4F6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #D4AF37;
+    color: #0B0C10;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0B0C10;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #D4AF37;
+    border-radius: 3px;
+  }
+}
+
+@layer utilities {
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #E8C94A 50%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .border-gradient-gold {
+    border-image: linear-gradient(135deg, #D4AF37, #E8C94A) 1;
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15), 0 0 60px rgba(212, 175, 55, 0.05);
+  }
+
+  .glow-gold-strong {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.3), 0 0 80px rgba(212, 175, 55, 0.1);
+  }
+
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+}
