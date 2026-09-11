@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronLeft, ChevronRight, Loader2, Award, CalendarDays, Clock, User, MapPin, Timer, MessageCircle, CheckCircle2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Loader2, Award, CalendarDays, Clock, User, MapPin, Timer, Globe, MessageCircle, CheckCircle2 } from 'lucide-react'
 import { programs } from '../../data/programs'
 import { coaches } from '../../data/coaches'
 import { buildWhatsAppLink } from '../../lib/whatsapp'
+import { indianTime } from '../../lib/istTime'
 
 interface BookingModalProps {
   open: boolean
@@ -601,6 +602,15 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                                 label: 'Timezone',
                                 value: data.timezone || '-',
                                 chip: 'text-rose-300 border-rose-300/40 bg-rose-400/10',
+                              },
+                              {
+                                icon: Globe,
+                                label: 'Indian Time IST',
+                                value:
+                                  data.timezone && data.time
+                                    ? indianTime(data.timezone, data.time)
+                                    : '-',
+                                chip: 'text-cyan-300 border-cyan-300/40 bg-cyan-400/10',
                               },
                             ].map((r, i) => (
                               <motion.div

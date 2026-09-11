@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "check:ist": "tsx scripts/check-ist.ts",
+    "build": "npm run check:ist && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "tsx": "^4.23.13",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
   },
