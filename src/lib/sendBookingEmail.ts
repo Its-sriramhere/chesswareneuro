@@ -10,7 +10,7 @@ export interface BookingEmailData {
   email: string
 }
 
-const ENDPOINT = 'https://formsubmit.co/ajax/sriram.efx@gmail.com'
+const ENDPOINT = 'https://formsubmit.co/ajax/chesswareneuropvttd@gmail.com'
 
 const timeToMin = (t: string): number => {
   const [hm, mod] = t.split(' ')
