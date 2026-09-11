@@ -62,13 +62,13 @@ export default function PerformanceData() {
               <h2 className="text-3xl md:text-5xl font-black text-ivory mb-6">
                 PLAYER PERFORMANCE <span className="text-gradient-gold">ANALYTICS</span>
               </h2>
-              <p className="text-ivory-dim leading-relaxed mb-8">
+              <div className="text-ivory-dim leading-relaxed mb-8">
                 <BlurText
                   text="Every move generates data. Every game tells a story. Chessware transforms raw performance into a clear roadmap for your improvement."
                   delay={40}
                   stepDuration={0.3}
                 />
-              </p>
+              </div>
               <div className="inline-flex items-center gap-3 bg-gold/10 border border-gold/30 rounded-full px-5 py-2.5 mb-8">
                 <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
                 <span className="text-xs font-mono tracking-widest text-gold">

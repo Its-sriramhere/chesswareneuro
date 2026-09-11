@@ -28,10 +28,8 @@ export default function HeroSection({ ready = false }: HeroSectionProps) {
           transition={{ duration: 0.6 }}
           className="flex items-center gap-3 mb-8"
         >
-          <img src="/logo/loading.png" alt="Chessware Neuro" className="h-10 md:h-12 w-auto object-contain" />
-          <span className="text-xs md:text-sm tracking-[0.3em] text-ivory-dim font-mono">
-            CHESSWARE NEURO
-          </span>
+          <img src="/logo/loading.png" alt="Chessware Neuro icon" className="h-10 md:h-12 w-auto object-contain" />
+          <img src="/logo/wordmark.png" alt="Chessware Neuro" className="h-10 md:h-12 w-auto object-contain" />
           <span className="hidden md:block w-px h-6 bg-slate-light" />
           <span className="hidden md:block text-xs text-ivory-dim font-mono">EST. 2021</span>
         </motion.div>

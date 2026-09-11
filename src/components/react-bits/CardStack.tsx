@@ -26,7 +26,7 @@ export default function CardStack({ items, className = '' }: CardStackProps) {
 
   return (
     <div className={`flex flex-col items-center gap-6 ${className}`}>
-      <div className="relative w-full max-w-xl h-[280px]">
+      <div className="relative w-full max-w-xl h-[280px] overflow-hidden">
         <AnimatePresence>
           {visible.map((idx) => (
             <motion.div

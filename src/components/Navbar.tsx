@@ -39,12 +39,14 @@ export default function Navbar() {
         <button onClick={() => scrollTo('hero')} className="flex items-center gap-3 py-2" aria-label="Chessware Neuro home">
           <img
             src="/logo/loading.png"
+            alt="Chessware Neuro icon"
+            className="h-8 md:h-10 w-auto object-contain"
+          />
+          <img
+            src="/logo/wordmark.png"
             alt="Chessware Neuro"
             className="h-8 md:h-10 w-auto object-contain"
           />
-          <span className="text-sm md:text-base font-display font-black tracking-[0.15em] text-ivory">
-            CHESSWARE <span className="text-gradient-gold">NEURO</span>
-          </span>
         </button>
 
         <nav className="hidden md:flex items-center gap-8">

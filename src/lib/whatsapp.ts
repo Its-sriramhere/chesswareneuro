@@ -1,6 +1,6 @@
 import { indianTime } from './istTime'
 
-export const COMPANY_WHATSAPP = '91XXXXXXXXXX'
+export const COMPANY_WHATSAPP = '917598111855'
 
 export interface WhatsAppBookingData {
   name: string
