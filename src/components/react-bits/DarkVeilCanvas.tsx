@@ -19,7 +19,9 @@ export default function DarkVeilCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationId: number
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    let animationId = 0
     let particles: Particle[] = []
     let width = 0
     let height = 0
@@ -38,7 +40,9 @@ export default function DarkVeilCanvas() {
     window.addEventListener('resize', resize)
 
     const spawn = () => {
-      const count = Math.min(220, Math.floor((window.innerWidth * window.innerHeight) / 7000))
+      const isMobile = window.innerWidth < 640
+      const cap = isMobile ? 90 : 220
+      const count = Math.min(cap, Math.floor((window.innerWidth * window.innerHeight) / 9000))
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -52,11 +56,10 @@ export default function DarkVeilCanvas() {
     spawn()
     window.addEventListener('resize', spawn)
 
-    const draw = () => {
+    const paint = (now: number) => {
       ctx.clearRect(0, 0, width, height)
 
-      // Warm ambient glow blobs
-      const t = performance.now() / 4000
+      const t = now / 4000
       const blob1x = width * (0.3 + 0.1 * Math.sin(t))
       const blob1y = height * (0.25 + 0.08 * Math.cos(t * 0.8))
       const blob2x = width * (0.7 + 0.1 * Math.sin(t * 1.3 + 2))
@@ -138,14 +141,52 @@ export default function DarkVeilCanvas() {
         ctx.fillStyle = `rgba(232, 201, 74, ${p.opacity * pulse})`
         ctx.fill()
       })
+    }
 
+    const draw = (now: number) => {
+      paint(now)
       animationId = requestAnimationFrame(draw)
     }
-    draw()
+
+    let running = false
+    let inView = true
+    let tabVisible = !document.hidden
+
+    const maybePause = () => {
+      const shouldRun = inView && tabVisible && !reduceMotion
+      if (shouldRun && !running) {
+        running = true
+        animationId = requestAnimationFrame(draw)
+      } else if (!shouldRun && running) {
+        running = false
+        cancelAnimationFrame(animationId)
+      }
+    }
+
+    if (reduceMotion) {
+      paint(performance.now())
+    } else {
+      running = true
+      animationId = requestAnimationFrame(draw)
+    }
+
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting
+      maybePause()
+    })
+    io.observe(canvas)
+
+    const onVisibility = () => {
+      tabVisible = !document.hidden
+      maybePause()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       cancelAnimationFrame(animationId)
+      io.disconnect()
       ro.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('resize', resize)
       window.removeEventListener('resize', spawn)
     }

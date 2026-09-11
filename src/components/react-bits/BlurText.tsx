@@ -60,16 +60,16 @@ export default function BlurText({
   }, [threshold, rootMargin])
 
   const defaultFrom = useMemo<AnimState>(
-    () => (direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 }),
+    () => (direction === 'top' ? { filter: 'blur(5px)', opacity: 0, y: -30 } : { filter: 'blur(5px)', opacity: 0, y: 30 }),
     [direction]
   )
 
   const defaultTo = useMemo<AnimState[]>(
     () => [
       {
-        filter: 'blur(5px)',
+        filter: 'blur(2px)',
         opacity: 0.5,
-        y: direction === 'top' ? 5 : -5,
+        y: direction === 'top' ? 3 : -3,
       },
       { filter: 'blur(0px)', opacity: 1, y: 0 },
     ],

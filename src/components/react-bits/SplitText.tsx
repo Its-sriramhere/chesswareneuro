@@ -25,10 +25,10 @@ export default function SplitText({
             <motion.span
               key={charIndex}
               className="inline-block"
-              initial={{ opacity: 0, y: 30, filter: 'blur(8px)' }}
+              initial={{ opacity: 0, y: 24, filter: 'blur(4px)' }}
               whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{
-                duration: 0.5,
+                duration: 0.45,
                 delay: delay + (wordIndex * stagger * 3 + charIndex * stagger),
                 ease: [0.22, 1, 0.36, 1],
               }}

@@ -1,6 +1,7 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { ContactShadows, RoundedBox, Text, Sparkles } from '@react-three/drei'
 import { useMemo, useRef, useState } from 'react'
+import { useInView } from 'framer-motion'
 import * as THREE from 'three'
 import ScrollReveal from '../react-bits/ScrollReveal'
 
@@ -320,8 +321,11 @@ function BreathingLights() {
 }
 
 export default function ChessboardHero() {
+  const mountRef = useRef<HTMLElement | null>(null)
+  const inView = useInView(mountRef, { once: true, amount: 0.15 })
+
   return (
-    <section id="interactive-board" className="relative py-24 bg-obsidian/60 overflow-hidden">
+    <section ref={mountRef} id="interactive-board" className="relative py-24 bg-obsidian/60 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-obsidian/50 via-obsidian/30 to-obsidian/50" />
       <div className="relative z-10 max-w-6xl mx-auto px-6">
         <ScrollReveal className="text-center mb-12">
@@ -349,12 +353,13 @@ export default function ChessboardHero() {
                 boxShadow: 'inset 0 0 120px rgba(212, 175, 55, 0.06), 0 0 80px rgba(212, 175, 55, 0.04)',
               }}
             >
-              <Canvas
-                camera={{ position: [0, 7, 9], fov: 40 }}
-                shadows
-                dpr={[1, 2]}
-                gl={{ antialias: true }}
-              >
+              {inView && (
+                <Canvas
+                  camera={{ position: [0, 7, 9], fov: 40 }}
+                  shadows
+                  dpr={[1, 1.5]}
+                  gl={{ antialias: true }}
+                >
                 <hemisphereLight intensity={0.5} color="#E8E4D8" groundColor="#0B0C10" />
                 <directionalLight position={[6, 9, 5]} intensity={1.4} color="#fff" castShadow shadow-mapSize={[1024, 1024]} />
                 <BreathingLights />
@@ -368,6 +373,7 @@ export default function ChessboardHero() {
                 <Chessboard />
                 <ContactShadows position={[0, -0.16, 0]} opacity={0.55} scale={11} blur={2.6} far={2.5} resolution={512} color="#000000" />
               </Canvas>
+            )}
             </div>
             <div className="flex items-center justify-between mt-4 text-xs font-mono text-ivory-dim">
               <span className="flex items-center gap-2">

@@ -76,7 +76,7 @@ export default function TechFeatures() {
               <BadgeCheck size={14} /> COMPLIMENTARY WITH ENROLLMENT
             </div>
             <h3 className="text-2xl md:text-3xl font-black text-ivory mb-3">
-              Every Chessware Neuro Student Gets SIGARAM64
+              Every Chessware Neuro Student Gets <span className="text-gradient-gold">SIGARAM64</span>
             </h3>
             <p className="text-sm text-ivory-dim mb-6">
               Full access at no extra cost.

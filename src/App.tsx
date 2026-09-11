@@ -110,7 +110,9 @@ export default function App() {
     <>
       <Preloader loading={loading} />
       <CustomCursor />
-      <ChessMatrixCanvas className="fixed inset-0 z-0 w-full h-full pointer-events-none" opacity={0.45} />
+      {!loading && (
+        <ChessMatrixCanvas className="fixed inset-0 z-0 w-full h-full pointer-events-none" opacity={0.45} />
+      )}
       <Navbar />
 
       <main className="relative z-10">

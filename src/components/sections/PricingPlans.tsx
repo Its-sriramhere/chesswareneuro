@@ -118,7 +118,7 @@ export default function PricingPlans({ onLevelTest }: { onLevelTest?: () => void
             onClick={onLevelTest}
           >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-            <p className="text-lg md:text-2xl font-semibold text-ivory mb-3">
+            <p className="text-xl md:text-3xl font-black text-gradient-gold mb-3">
               Not sure where you belong?
             </p>
             <p className="text-sm text-ivory-dim mb-6">

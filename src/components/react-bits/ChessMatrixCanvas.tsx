@@ -20,14 +20,18 @@ export default function ChessMatrixCanvas({
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationId: number
-    const SPACING = 26
-    const FONT_SIZE = 18
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const isMobile = window.innerWidth < 640
+
+    let animationId = 0
+    const SPACING = isMobile ? 32 : 26
+    const FONT_SIZE = isMobile ? 24 : 26
 
     const resetDrop = (height: number) => ({
       y: Math.random() * -height,
-      speed: 0.25 + Math.random() * 0.55,
+      speed: 0.16 + Math.random() * 0.35,
       head: Math.floor(Math.random() * 20) + 6,
+      jx: (Math.random() - 0.5) * 4,
     })
 
     const resizeTo = (w: number, h: number) => {
@@ -50,50 +54,99 @@ export default function ChessMatrixCanvas({
     ro.observe(canvas)
     window.addEventListener('resize', resize)
 
-    const draw = () => {
-      ctx.fillStyle = `rgba(11, 12, 16, ${0.06 * Math.min(opacity + 0.2, 1)})`
+    const paint = (now: number) => {
+      ctx.fillStyle = `rgba(11, 12, 16, ${0.05 * Math.min(opacity + 0.2, 1)})`
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       ctx.font = `${FONT_SIZE}px serif`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
 
+      const t = now / 1000
+
       for (let i = 0; i < drops.length; i++) {
         const drop = drops[i]
-        const x = i * SPACING + SPACING / 2
-        const y = drop.y
+        const x = i * SPACING + SPACING / 2 + drop.jx
+        const stagger = i % 2 === 1 ? SPACING / 2 : 0
+        const y = drop.y + stagger
 
-        if (y > canvas.height + 40) {
+        if (drop.y > canvas.height + 40) {
           drops[i] = resetDrop(canvas.height)
           continue
         }
 
-        const isHead = Math.random() > 0.9
-        const dimGold = `rgba(212, 175, 55, ${(0.45 + opacity * 0.25).toFixed(3)})`
-        const brightGold = `rgba(240, 210, 120, ${Math.min(0.6 + opacity, 1).toFixed(3)})`
+        const isHead = Math.random() > 0.94
+        const pulse = 0.5 + 0.5 * Math.sin(t * 1.4 + i * 1.3)
+        const headPulse = 0.35 + 0.65 * Math.sin(t * 2.2 + i)
+        const base = 0.75 + opacity * 0.25
+        const dimAlpha = Math.min(base * (0.25 + 0.75 * pulse) * 1.15, 1)
+        const dimGold = `rgba(212, 175, 55, ${dimAlpha.toFixed(3)})`
+        const brightGold = `rgba(240, 210, 120, ${Math.min(0.35 + 0.9 * headPulse, 1).toFixed(3)})`
 
-        for (let t = 0; t < Math.min(drop.head, 12); t++) {
-          const ty = y - t * FONT_SIZE
+        for (let c = 0; c < Math.min(drop.head, 12); c++) {
+          const ty = y - c * FONT_SIZE
           if (ty < -10) break
-          ctx.fillStyle = t === 0 && isHead ? brightGold : dimGold
+          ctx.fillStyle = c === 0 && isHead ? brightGold : dimGold
           ctx.fillText(
-            t === 0 ? PIECE_CHARS[Math.floor(Math.random() * PIECE_CHARS.length)] : DIM_CHARS[Math.floor(Math.random() * DIM_CHARS.length)],
+            c === 0
+              ? PIECE_CHARS[Math.floor(Math.random() * PIECE_CHARS.length)]
+              : DIM_CHARS[Math.floor(Math.random() * DIM_CHARS.length)],
             x,
             ty
           )
         }
 
-        drop.y += drop.speed * 1.6
+        drop.y += drop.speed * 1.4
       }
+    }
 
+    const draw = (now: number) => {
+      paint(now)
       animationId = requestAnimationFrame(draw)
     }
-    draw()
+
+    let running = false
+    let inView = true
+    let tabVisible = !document.hidden
+
+    const maybePause = () => {
+      const shouldRun = inView && tabVisible && !reduceMotion
+      if (shouldRun && !running) {
+        running = true
+        animationId = requestAnimationFrame(draw)
+      } else if (!shouldRun && running) {
+        running = false
+        cancelAnimationFrame(animationId)
+      }
+    }
+
+    if (reduceMotion) {
+      paint(performance.now() + 1000)
+    } else {
+      running = true
+      animationId = requestAnimationFrame(draw)
+    }
+
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting
+      maybePause()
+    })
+    io.observe(canvas)
+
+    const onVisibility = () => {
+      tabVisible = !document.hidden
+      maybePause()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('resize', maybePause)
 
     return () => {
       cancelAnimationFrame(animationId)
+      io.disconnect()
       ro.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('resize', maybePause)
     }
   }, [opacity])
 

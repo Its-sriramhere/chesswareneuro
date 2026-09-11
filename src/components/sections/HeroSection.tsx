@@ -37,8 +37,8 @@ export default function HeroSection({ ready = false }: HeroSectionProps) {
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }}
-          animate={ready ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
+          initial={{ opacity: 0, y: 30 }}
+          animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-6"
         >

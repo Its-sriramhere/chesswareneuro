@@ -20,7 +20,9 @@ function NetworkCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationId: number
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    let animationId = 0
     const resize = () => {
       canvas.width = canvas.offsetWidth
       canvas.height = canvas.offsetHeight
@@ -35,7 +37,7 @@ function NetworkCanvas() {
       pulse: Math.random() * Math.PI * 2,
     }))
 
-    const draw = () => {
+    const draw = (now: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       // Angled perspective grid
@@ -66,7 +68,7 @@ function NetworkCanvas() {
       })
 
       // Data pulses traveling along connections
-      const t = performance.now() / 1000
+      const t = now / 1000
       nodes.forEach((a, i) => {
         nodes.forEach((b, j) => {
           if (j <= i) return
@@ -107,10 +109,53 @@ function NetworkCanvas() {
 
       animationId = requestAnimationFrame(draw)
     }
-    draw()
+
+    let running = false
+    let inView = true
+    let tabVisible = !document.hidden
+
+    const maybePause = () => {
+      const shouldRun = inView && tabVisible && !reduceMotion
+      if (shouldRun && !running) {
+        running = true
+        animationId = requestAnimationFrame(draw)
+      } else if (!shouldRun && running) {
+        running = false
+        cancelAnimationFrame(animationId)
+      }
+    }
+
+    if (reduceMotion) {
+      draw(2000)
+      cancelAnimationFrame(animationId)
+    } else {
+      running = true
+      animationId = requestAnimationFrame(draw)
+    }
+
+    const ro = new ResizeObserver(() => {
+      resize()
+      maybePause()
+    })
+    ro.observe(canvas)
+
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting
+      maybePause()
+    })
+    io.observe(canvas)
+
+    const onVisibility = () => {
+      tabVisible = !document.hidden
+      maybePause()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       cancelAnimationFrame(animationId)
+      io.disconnect()
+      ro.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('resize', resize)
     }
   }, [])
