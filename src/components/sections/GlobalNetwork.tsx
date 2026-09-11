@@ -23,31 +23,37 @@ function NetworkCanvas() {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let animationId = 0
+    let cssW = 0
+    let cssH = 0
     const resize = () => {
-      canvas.width = canvas.offsetWidth
-      canvas.height = canvas.offsetHeight
+      cssW = canvas.offsetWidth
+      cssH = canvas.offsetHeight
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.round(cssW * dpr)
+      canvas.height = Math.round(cssH * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     resize()
     window.addEventListener('resize', resize)
 
     const nodes = hubs.map((h) => ({
       h,
-      x: (h.x / 100) * canvas.width,
-      y: (h.y / 100) * canvas.height,
+      x: (h.x / 100) * cssW,
+      y: (h.y / 100) * cssH,
       pulse: Math.random() * Math.PI * 2,
     }))
 
     const draw = (now: number) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, cssW, cssH)
 
       // Angled perspective grid
       ctx.strokeStyle = 'rgba(212, 175, 55, 0.04)'
       ctx.lineWidth = 1
       for (let i = -10; i < 20; i++) {
-        const x = (i / 10) * canvas.width + canvas.width / 2
+        const x = (i / 10) * cssW + cssW / 2
         ctx.beginPath()
         ctx.moveTo(x, 0)
-        ctx.lineTo(x - canvas.width / 3, canvas.height)
+        ctx.lineTo(x - cssW / 3, cssH)
         ctx.stroke()
       }
 
@@ -56,11 +62,11 @@ function NetworkCanvas() {
         nodes.forEach((b, j) => {
           if (j <= i) return
           const dist = Math.hypot(a.x - b.x, a.y - b.y)
-          if (dist < canvas.width * 0.45) {
+          if (dist < cssW * 0.45) {
             ctx.beginPath()
             ctx.moveTo(a.x, a.y)
             ctx.lineTo(b.x, b.y)
-            ctx.strokeStyle = `rgba(212, 175, 55, ${0.25 * (1 - dist / (canvas.width * 0.45))})`
+            ctx.strokeStyle = `rgba(212, 175, 55, ${0.25 * (1 - dist / (cssW * 0.45))})`
             ctx.lineWidth = 1
             ctx.stroke()
           }
@@ -73,7 +79,7 @@ function NetworkCanvas() {
         nodes.forEach((b, j) => {
           if (j <= i) return
           const dist = Math.hypot(a.x - b.x, a.y - b.y)
-          if (dist > canvas.width * 0.45) return
+          if (dist > cssW * 0.45) return
           const pulse = (t * 0.4 + i * 0.3 + j * 0.5) % 1
           const px = a.x + (b.x - a.x) * pulse
           const py = a.y + (b.y - a.y) * pulse

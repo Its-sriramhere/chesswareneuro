@@ -3,13 +3,14 @@ export interface BookingEmailData {
   programPrice?: string
   coach: string
   timezone: string
+  hours: string
   date: string
   time: string
   name: string
   email: string
 }
 
-const ENDPOINT = 'https://formsubmit.co/ajax/chesswareneuropvttd@gmail.com'
+const ENDPOINT = 'https://formsubmit.co/ajax/sriram.efx@gmail.com'
 
 export async function sendBookingEmail(data: BookingEmailData): Promise<void> {
   const payload = {
@@ -20,6 +21,7 @@ export async function sendBookingEmail(data: BookingEmailData): Promise<void> {
     Email: data.email,
     Program: data.program,
     Coach: data.coach,
+    Session: data.hours,
     Timezone: data.timezone,
     Date: data.date,
     Time: data.time,

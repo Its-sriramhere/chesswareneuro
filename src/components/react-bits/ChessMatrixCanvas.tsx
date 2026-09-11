@@ -21,11 +21,10 @@ export default function ChessMatrixCanvas({
     if (!ctx) return
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const isMobile = window.innerWidth < 640
 
     let animationId = 0
-    const SPACING = isMobile ? 32 : 26
-    const FONT_SIZE = isMobile ? 24 : 26
+    const SPACING = 26
+    const FONT_SIZE = 26
 
     const resetDrop = (height: number) => ({
       y: Math.random() * -height,
@@ -34,11 +33,18 @@ export default function ChessMatrixCanvas({
       jx: (Math.random() - 0.5) * 4,
     })
 
+    let cssW = 0
+    let cssH = 0
+
     const resizeTo = (w: number, h: number) => {
-      canvas.width = w
-      canvas.height = h
-      const cols = Math.ceil(canvas.width / SPACING)
-      while (drops.length < cols) drops.push(resetDrop(canvas.height))
+      cssW = w
+      cssH = h
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.round(w * dpr)
+      canvas.height = Math.round(h * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const cols = Math.ceil(cssW / SPACING)
+      while (drops.length < cols) drops.push(resetDrop(cssH))
       while (drops.length > cols) drops.pop()
     }
 
@@ -56,7 +62,7 @@ export default function ChessMatrixCanvas({
 
     const paint = (now: number) => {
       ctx.fillStyle = `rgba(11, 12, 16, ${0.05 * Math.min(opacity + 0.2, 1)})`
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillRect(0, 0, cssW, cssH)
 
       ctx.font = `${FONT_SIZE}px serif`
       ctx.textAlign = 'center'
@@ -70,7 +76,7 @@ export default function ChessMatrixCanvas({
         const stagger = i % 2 === 1 ? SPACING / 2 : 0
         const y = drop.y + stagger
 
-        if (drop.y > canvas.height + 40) {
+        if (drop.y > cssH + 40) {
           drops[i] = resetDrop(canvas.height)
           continue
         }

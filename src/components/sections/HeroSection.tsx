@@ -33,7 +33,7 @@ export default function HeroSection({ ready = false }: HeroSectionProps) {
             CHESSWARE NEURO
           </span>
           <span className="hidden md:block w-px h-6 bg-slate-light" />
-          <span className="hidden md:block text-xs text-ivory-dim font-mono">EST. 2026</span>
+          <span className="hidden md:block text-xs text-ivory-dim font-mono">EST. 2021</span>
         </motion.div>
 
         <motion.h1

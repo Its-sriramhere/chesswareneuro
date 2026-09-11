@@ -15,6 +15,7 @@ export interface BookingData {
   program: string
   coach: string
   timezone: string
+  hours: string
   date: string
   time: string
   name: string
@@ -36,6 +37,14 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 const morningTimes = ['09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '01:00 PM']
 const eveningTimes = ['02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM', '09:00 PM']
+const sessionHours = ['1 hour', '1.5 hours', '2 hours']
+
+const timeToMin = (t: string) => {
+  const [hm, mod] = t.split(' ')
+  const [h, m] = hm.split(':').map(Number)
+  const hr = (h % 12) + (mod === 'PM' ? 12 : 0)
+  return hr * 60 + m
+}
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -73,7 +82,7 @@ const weekLabel = (week: Date[]) => {
   } ${last.getFullYear()}`
 }
 
-const steps = ['Program', 'Coach', 'Timezone', 'Date', 'Time', 'Details']
+const steps = ['Program', 'Coach', 'Timezone', 'Date', 'Session Hours', 'Timing', 'Details']
 
 export default function BookingModal({ open, onClose, onComplete, initialProgram }: BookingModalProps) {
   const [step, setStep] = useState(0)
@@ -81,6 +90,7 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
     program: initialProgram || 'foundation',
     coach: '',
     timezone: '',
+    hours: '1 hour',
     date: '',
     time: '',
     name: '',
@@ -124,7 +134,7 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
       setError("That email address doesn't look right — please check it and try again.")
       return
     }
-    if (!data.coach || !data.timezone || !data.date || !data.time) {
+    if (!data.coach || !data.timezone || !data.hours || !data.date || !data.time) {
       setError('Please complete all booking details.')
       return
     }
@@ -332,7 +342,41 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                   )}
 
                   {step === 4 && (
+                    <div className="space-y-4">
+                      <div className="bg-obsidian/60 border border-slate-light rounded-xl p-5 text-center">
+                        <p className="text-xs font-mono text-gold tracking-widest mb-2">HOW LONG IS YOUR SESSION?</p>
+                        <p className="text-sm text-ivory-dim">Pick the duration, then choose a start time that fits it.</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        {sessionHours.map((h) => (
+                          <button
+                            key={h}
+                            onClick={() => setData({ ...data, hours: h, time: '' })}
+                            className={`p-5 rounded-xl border text-center transition-colors ${
+                              data.hours === h
+                                ? 'border-gold bg-gold/10'
+                                : 'border-slate-light bg-obsidian/60 hover:border-gold/40'
+                            }`}
+                          >
+                            <span className="block text-xl font-bold text-ivory">{h.split(' ')[0]}</span>
+                            <span className="block text-[10px] font-mono text-gold mt-1 uppercase">
+                              {h.split(' ')[1]}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {step === 5 && (() => {
+                    const sessionMin = parseFloat(data.hours || '1') * 60
+                    const maxStart = 21 * 60 - sessionMin
+                    const eveningSlots = eveningTimes.filter((t) => timeToMin(t) <= maxStart)
+                    return (
                     <div className="space-y-5">
+                      <p className="text-xs font-mono text-gold tracking-widest text-center">
+                        SELECT A START TIME FOR YOUR {data.hours.toUpperCase()} SESSION
+                      </p>
                       <div>
                         <p className="text-xs font-mono text-gold tracking-widest mb-3">MORNING — 9 AM TO 1 PM</p>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -354,7 +398,7 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                       <div>
                         <p className="text-xs font-mono text-gold tracking-widest mb-3">EVENING — 2 PM TO 9 PM</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {eveningTimes.map((t) => (
+                          {eveningSlots.map((t) => (
                             <button
                               key={t}
                               onClick={() => setData({ ...data, time: t })}
@@ -370,9 +414,10 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                         </div>
                       </div>
                     </div>
-                  )}
+                    );
+                    })()}
 
-                  {step === 5 && (
+                  {step === 6 && (
                     <div className="space-y-4">
                       <input
                         value={data.name}
@@ -411,6 +456,9 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                           </p>
                           <p className="text-ivory-dim">
                             <span className="text-ivory">Coach:</span> {data.coach || '-'}
+                          </p>
+                          <p className="text-ivory-dim">
+                            <span className="text-ivory">Session:</span> {data.hours || '-'}
                           </p>
                           <p className="text-ivory-dim">
                             <span className="text-ivory">Slot:</span> {data.date} • {data.time}

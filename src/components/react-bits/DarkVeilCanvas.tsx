@@ -27,8 +27,12 @@ export default function DarkVeilCanvas() {
     let height = 0
 
     const resizeTo = (w: number, h: number) => {
-      width = canvas.width = w
-      height = canvas.height = h
+      width = w
+      height = h
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.round(w * dpr)
+      canvas.height = Math.round(h * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     const resize = () => resizeTo(window.innerWidth, window.innerHeight)
     resize()
