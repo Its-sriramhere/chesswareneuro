@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Loader2, Award, CalendarDays, Clock, User, MapPin, Timer } from 'lucide-react'
 import { programs } from '../../data/programs'
 import { coaches } from '../../data/coaches'
 
@@ -111,9 +111,12 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
   }, [open])
 
   useEffect(() => {
-    if (open && coaches.length === 1) {
-      setData((d) => ({ ...d, coach: d.coach || coaches[0].name }))
+    if (open && coaches.length === 1 && !data.coach) {
+      setData((d) => ({ ...d, coach: coaches[0].name }))
     }
+  }, [open, data.coach, coaches])
+
+  useEffect(() => {
     if (open) {
       setWeekIndex(0)
       setError(null)
@@ -121,21 +124,31 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
   }, [open])
 
   const next = async () => {
+    setError(null)
+    const stepError =
+      (step === 1 && !data.coach)
+        ? 'Please choose a coach to continue.'
+        : (step === 2 && !data.timezone)
+          ? 'Please select your timezone to continue.'
+          : (step === 3 && !data.date)
+            ? 'Please pick a date to continue.'
+            : (step === 5 && !data.time)
+              ? 'Please choose a start time to continue.'
+              : null
+    if (stepError) {
+      setError(stepError)
+      return
+    }
     if (step < steps.length - 1) {
       setStep(step + 1)
       return
     }
-    setError(null)
     if (!data.name.trim() || !data.email.trim()) {
       setError('Please enter your name and email to confirm.')
       return
     }
     if (!EMAIL_RE.test(data.email.trim())) {
       setError("That email address doesn't look right — please check it and try again.")
-      return
-    }
-    if (!data.coach || !data.timezone || !data.hours || !data.date || !data.time) {
-      setError('Please complete all booking details.')
       return
     }
     setSending(true)
@@ -147,6 +160,21 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
     }
   }
   const back = () => setStep(Math.max(0, step - 1))
+
+  const stepReady = (s: number) => {
+    switch (s) {
+      case 1:
+        return !!data.coach
+      case 2:
+        return !!data.timezone
+      case 3:
+        return !!data.date
+      case 5:
+        return !!data.time
+      default:
+        return true
+    }
+  }
 
   const selectedProgram = programs.find((p) => p.level === data.program)
 
@@ -315,26 +343,42 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                         </button>
                       </div>
                       <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-                        {WEEKS[weekIndex].map((d) => {
+                        {WEEKS[weekIndex].map((d, di) => {
                           const label = fmtDate(d)
                           const isSelected = data.date === label
                           return (
-                            <button
+                            <motion.button
                               key={label}
+                              initial={{ opacity: 0, scale: 0.55 }}
+                              animate={{ opacity: 1, scale: isSelected ? 1.06 : 1 }}
+                              whileTap={{ scale: 0.88 }}
+                              transition={{
+                                delay: (di % 7) * 0.045,
+                                type: 'spring',
+                                stiffness: 350,
+                                damping: 24,
+                              }}
                               onClick={() => setData({ ...data, date: label })}
-                              className={`p-3 rounded-xl border text-center transition-colors ${
+                              className={`relative p-3 rounded-xl border text-center transition-colors ${
                                 isSelected
-                                  ? 'border-gold bg-gold/10'
+                                  ? 'border-gold bg-gold/15'
                                   : 'border-slate-light bg-obsidian/60 hover:border-gold/40'
                               }`}
                             >
+                              {isSelected && (
+                                <motion.span
+                                  layoutId="dayHighlight"
+                                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                  className="absolute inset-0 rounded-xl border-2 border-gold ring-2 ring-gold/30 shadow-[0_0_18px_rgba(212,175,55,0.35)]"
+                                />
+                              )}
                               <span className="block text-[10px] font-mono text-ivory-dim">{WEEKDAYS[d.getDay()]}</span>
                               <span className="text-base font-bold text-ivory mt-0.5">{d.getDate()}</span>
                               <span className="block text-[9px] text-gold mt-0.5">
                                 {MONTHS[d.getMonth()]}
                                 {d.getFullYear() !== 2026 ? ` ${d.getFullYear()}` : ''}
                               </span>
-                            </button>
+                            </motion.button>
                           )
                         })}
                       </div>
@@ -348,21 +392,32 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                         <p className="text-sm text-ivory-dim">Pick the duration, then choose a start time that fits it.</p>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
-                        {sessionHours.map((h) => (
-                          <button
+                        {sessionHours.map((h, i) => (
+                          <motion.button
                             key={h}
+                            initial={{ opacity: 0, y: 18 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileTap={{ scale: 0.9 }}
+                            transition={{ delay: 0.1 + i * 0.1, type: 'spring', stiffness: 300, damping: 22 }}
                             onClick={() => setData({ ...data, hours: h, time: '' })}
-                            className={`p-5 rounded-xl border text-center transition-colors ${
+                            className={`relative p-5 rounded-xl border text-center transition-colors overflow-hidden ${
                               data.hours === h
-                                ? 'border-gold bg-gold/10'
+                                ? 'border-gold bg-gold/15'
                                 : 'border-slate-light bg-obsidian/60 hover:border-gold/40'
                             }`}
                           >
-                            <span className="block text-xl font-bold text-ivory">{h.split(' ')[0]}</span>
-                            <span className="block text-[10px] font-mono text-gold mt-1 uppercase">
+                            {data.hours === h && (
+                              <motion.span
+                                layoutId="hoursHighlight"
+                                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                className="absolute inset-0 rounded-xl border-2 border-gold ring-2 ring-gold/30 shadow-[0_0_18px_rgba(212,175,55,0.35)]"
+                              />
+                            )}
+                            <span className="relative block text-xl font-bold text-ivory">{h.split(' ')[0]}</span>
+                            <span className="relative block text-[10px] font-mono text-gold mt-1 uppercase">
                               {h.split(' ')[1]}
                             </span>
-                          </button>
+                          </motion.button>
                         ))}
                       </div>
                     </div>
@@ -380,36 +435,58 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                       <div>
                         <p className="text-xs font-mono text-gold tracking-widest mb-3">MORNING — 9 AM TO 1 PM</p>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                          {morningTimes.map((t) => (
-                            <button
+                          {morningTimes.map((t, ti) => (
+                            <motion.button
                               key={t}
+                              initial={{ opacity: 0, scale: 0.6 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              whileTap={{ scale: 0.88 }}
+                              transition={{ delay: ti * 0.06, type: 'spring', stiffness: 350, damping: 24 }}
                               onClick={() => setData({ ...data, time: t })}
-                              className={`p-3 rounded-xl border text-center transition-colors ${
+                              className={`relative p-3 rounded-xl border text-center transition-colors overflow-hidden ${
                                 data.time === t
-                                  ? 'border-gold bg-gold/10'
+                                  ? 'border-gold bg-gold/15'
                                   : 'border-slate-light bg-obsidian/60 hover:border-gold/40'
                               }`}
                             >
-                              <span className="text-sm font-mono text-ivory">{t}</span>
-                            </button>
+                              {data.time === t && (
+                                <motion.span
+                                  layoutId="timeHighlight"
+                                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                  className="absolute inset-0 rounded-xl border-2 border-gold ring-2 ring-gold/30 shadow-[0_0_14px_rgba(212,175,55,0.35)]"
+                                />
+                              )}
+                              <span className="relative text-sm font-mono text-ivory">{t}</span>
+                            </motion.button>
                           ))}
                         </div>
                       </div>
                       <div>
                         <p className="text-xs font-mono text-gold tracking-widest mb-3">EVENING — 2 PM TO 9 PM</p>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          {eveningSlots.map((t) => (
-                            <button
+                          {eveningSlots.map((t, ti) => (
+                            <motion.button
                               key={t}
+                              initial={{ opacity: 0, scale: 0.6 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              whileTap={{ scale: 0.88 }}
+                              transition={{ delay: ti * 0.06, type: 'spring', stiffness: 350, damping: 24 }}
                               onClick={() => setData({ ...data, time: t })}
-                              className={`p-3 rounded-xl border text-center transition-colors ${
+                              className={`relative p-3 rounded-xl border text-center transition-colors overflow-hidden ${
                                 data.time === t
-                                  ? 'border-gold bg-gold/10'
+                                  ? 'border-gold bg-gold/15'
                                   : 'border-slate-light bg-obsidian/60 hover:border-gold/40'
                               }`}
                             >
-                              <span className="text-sm font-mono text-ivory">{t}</span>
-                            </button>
+                              {data.time === t && (
+                                <motion.span
+                                  layoutId="timeHighlight"
+                                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                  className="absolute inset-0 rounded-xl border-2 border-gold ring-2 ring-gold/30 shadow-[0_0_14px_rgba(212,175,55,0.35)]"
+                                />
+                              )}
+                              <span className="relative text-sm font-mono text-ivory">{t}</span>
+                            </motion.button>
                           ))}
                         </div>
                       </div>
@@ -441,31 +518,90 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                           That email address doesn&apos;t look right — e.g. you@example.com
                         </p>
                       )}
-                      <div className="bg-obsidian/60 border border-slate-light rounded-xl p-5">
-                        <p className="text-xs font-mono text-gold tracking-widest mb-3">SUMMARY</p>
-                        <div className="space-y-1 text-sm">
-                          <p className="text-ivory-dim">
-                            <span className="text-ivory">Program:</span>{' '}
-                            <span className="capitalize">{selectedProgram ? selectedProgram.level : '-'}</span>
-                            {selectedProgram && (
-                              <span className="text-gold">
-                                {' '}
-                                (1-on-1 ${selectedProgram.price1on1} / Group ${selectedProgram.priceGroup} per month)
-                              </span>
-                            )}
+                      <div className="relative rounded-2xl p-[1.5px] bg-gradient-to-br from-gold/80 via-ivory/25 to-sky-400/50 overflow-hidden">
+                        <div className="relative rounded-2xl bg-obsidian/95 p-5">
+                          <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-gold/15 blur-2xl pointer-events-none" />
+                          <div className="absolute -bottom-10 -left-8 w-28 h-28 rounded-full bg-sky-400/15 blur-2xl pointer-events-none" />
+                          <p className="text-[10px] font-mono tracking-[0.35em] text-gold text-center mb-1">
+                            ✦ YOUR BOOKING PASS ✦
                           </p>
-                          <p className="text-ivory-dim">
-                            <span className="text-ivory">Coach:</span> {data.coach || '-'}
+                          <p className="text-center text-[9px] font-mono text-ivory-dim tracking-widest mb-4">
+                            CHESSWARE NEURO
                           </p>
-                          <p className="text-ivory-dim">
-                            <span className="text-ivory">Session:</span> {data.hours || '-'}
-                          </p>
-                          <p className="text-ivory-dim">
-                            <span className="text-ivory">Slot:</span> {data.date} • {data.time}
-                          </p>
-                          <p className="text-ivory-dim">
-                            <span className="text-ivory">Timezone:</span> {data.timezone || '-'}
-                          </p>
+                          <div className="relative">
+                            {[
+                              {
+                                icon: Award,
+                                label: 'Program',
+                                value: selectedProgram
+                                  ? `${selectedProgram.level} — ${selectedProgram.title}`
+                                  : '-',
+                                chip: 'text-gold border-gold/40 bg-gold/10',
+                              },
+                              {
+                                icon: User,
+                                label: 'Coach',
+                                value: data.coach || '-',
+                                chip: 'text-sky-300 border-sky-300/40 bg-sky-400/10',
+                              },
+                              {
+                                icon: Timer,
+                                label: 'Session',
+                                value: data.hours || '-',
+                                chip: 'text-emerald-300 border-emerald-300/40 bg-emerald-400/10',
+                              },
+                              {
+                                icon: CalendarDays,
+                                label: 'Date',
+                                value: data.date || '-',
+                                chip: 'text-violet-300 border-violet-300/40 bg-violet-400/10',
+                              },
+                              {
+                                icon: Clock,
+                                label: 'Start Time',
+                                value: data.time || '-',
+                                chip: 'text-amber-300 border-amber-300/40 bg-amber-400/10',
+                              },
+                              {
+                                icon: MapPin,
+                                label: 'Timezone',
+                                value: data.timezone || '-',
+                                chip: 'text-rose-300 border-rose-300/40 bg-rose-400/10',
+                              },
+                            ].map((r, i) => (
+                              <motion.div
+                                key={r.label}
+                                initial={{ opacity: 0, x: -14 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 260, damping: 24 }}
+                                className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0"
+                              >
+                                <span
+                                  className={`w-9 h-9 shrink-0 rounded-lg border flex items-center justify-center ${r.chip}`}
+                                >
+                                  <r.icon size={16} />
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-[9px] font-mono uppercase tracking-[0.25em] text-ivory-dim">
+                                    {r.label}
+                                  </p>
+                                  <p className="text-sm text-ivory truncate">
+                                    {r.label === 'Program' && selectedProgram ? (
+                                      <>
+                                        <span className="capitalize">{selectedProgram.level}</span>
+                                        <span className="text-gold text-xs">
+                                          {' '}
+                                          (1-on-1 ${selectedProgram.price1on1} / Group ${selectedProgram.priceGroup})
+                                        </span>
+                                      </>
+                                    ) : (
+                                      r.value
+                                    )}
+                                  </p>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -485,7 +621,9 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
               <button
                 onClick={next}
                 disabled={sending}
-                className="inline-flex items-center gap-2 text-sm font-mono tracking-widest text-obsidian bg-gold rounded-lg px-6 py-3 hover:bg-gold-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className={`inline-flex items-center gap-2 text-sm font-mono tracking-widest text-obsidian bg-gold rounded-lg px-6 py-3 hover:bg-gold-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                  stepReady(step) ? '' : 'opacity-70'
+                }`}
               >
                 {sending ? (
                   <>
