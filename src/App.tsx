@@ -85,10 +85,9 @@ export default function App() {
   const handleBookingComplete = useCallback(
     async (data: BookingData) => {
       await sendBookingEmail(data)
-      setBookingOpen(false)
       showToast(
-        'Booking Confirmed',
-        `${data.name}, your session with ${data.coach || 'your coach'} is booked for ${data.date} at ${data.time}. A confirmation has been sent.`
+        'Booking Request Sent',
+        `${data.name}, your request for ${data.coach || 'your coach'} on ${data.date} at ${data.time} has been received. A confirmation email is on its way.`
       )
     },
     [showToast]

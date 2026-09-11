@@ -19,7 +19,12 @@ const columns = [
   },
 ]
 
-const socials = ['X', 'LinkedIn', 'Instagram', 'YouTube']
+const socials = [
+  { label: 'X', href: null },
+  { label: 'LinkedIn', href: null },
+  { label: 'Instagram', href: 'https://www.instagram.com/suryakumaarchess/' },
+  { label: 'YouTube', href: null },
+]
 
 const contact = {
   title: 'CONTACT',
@@ -106,14 +111,26 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-slate-light/50">
           <div className="flex items-center gap-6">
-            {socials.map((s) => (
-              <button
-                key={s}
-                className="text-xs font-mono tracking-widest text-ivory-dim hover:text-gold transition-colors"
-              >
-                {s}
-              </button>
-            ))}
+            {socials.map((s) =>
+              s.href ? (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono tracking-widest text-ivory-dim hover:text-gold transition-colors"
+                >
+                  {s.label}
+                </a>
+              ) : (
+                <button
+                  key={s.label}
+                  className="text-xs font-mono tracking-widest text-ivory-dim hover:text-gold transition-colors"
+                >
+                  {s.label}
+                </button>
+              )
+            )}
           </div>
           <p className="text-xs text-ivory-dim text-center">
             © {year} Chessware Neuro. All rights reserved.

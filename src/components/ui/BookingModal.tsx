@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronLeft, ChevronRight, Loader2, Award, CalendarDays, Clock, User, MapPin, Timer } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Loader2, Award, CalendarDays, Clock, User, MapPin, Timer, MessageCircle, CheckCircle2 } from 'lucide-react'
 import { programs } from '../../data/programs'
 import { coaches } from '../../data/coaches'
+import { buildWhatsAppLink } from '../../lib/whatsapp'
 
 interface BookingModalProps {
   open: boolean
@@ -20,6 +21,9 @@ export interface BookingData {
   time: string
   name: string
   email: string
+  whatsapp?: string
+  country?: string
+  message?: string
 }
 
 const timezones = [
@@ -95,10 +99,14 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
     time: '',
     name: '',
     email: '',
+    whatsapp: '',
+    country: '',
+    message: '',
   })
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [weekIndex, setWeekIndex] = useState(0)
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -120,6 +128,7 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
     if (open) {
       setWeekIndex(0)
       setError(null)
+      setSubmitted(false)
     }
   }, [open])
 
@@ -154,6 +163,8 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
     setSending(true)
     try {
       await onComplete(data)
+      setSending(false)
+      setSubmitted(true)
     } catch {
       setSending(false)
       setError('Failed to send your booking. Please check your connection and try again.')
@@ -215,6 +226,8 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
             </div>
 
             {/* Step indicator */}
+            {!submitted ? (
+              <>
             <div className="flex items-center gap-2 px-6 py-5">
               {steps.map((s, i) => (
                 <div key={s} className="flex-1">
@@ -518,6 +531,27 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                           That email address doesn&apos;t look right — e.g. you@example.com
                         </p>
                       )}
+                      <input
+                        value={data.whatsapp}
+                        onChange={(e) => setData({ ...data, whatsapp: e.target.value })}
+                        placeholder="WhatsApp number (e.g. +91 98765 43210)"
+                        inputMode="tel"
+                        className="w-full bg-obsidian/60 border border-slate-light rounded-xl px-5 py-4 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                      />
+                      <input
+                        value={data.country}
+                        onChange={(e) => setData({ ...data, country: e.target.value })}
+                        placeholder="Country (e.g. India)"
+                        className="w-full bg-obsidian/60 border border-slate-light rounded-xl px-5 py-4 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                      />
+                      <textarea
+                        value={data.message}
+                        onChange={(e) => setData({ ...data, message: e.target.value })}
+                        placeholder="Message (optional) — anything we should know?"
+                        rows={3}
+                        maxLength={300}
+                        className="w-full resize-none bg-obsidian/60 border border-slate-light rounded-xl px-5 py-4 text-ivory placeholder:text-ivory-dim/50 focus:border-gold focus:outline-none"
+                      />
                       <div className="relative rounded-2xl p-[1.5px] bg-gradient-to-br from-gold/80 via-ivory/25 to-sky-400/50 overflow-hidden">
                         <div className="relative rounded-2xl bg-obsidian/95 p-5">
                           <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-gold/15 blur-2xl pointer-events-none" />
@@ -640,6 +674,46 @@ export default function BookingModal({ open, onClose, onComplete, initialProgram
                 )}
               </button>
             </div>
+              </>
+            ) : (
+              <div className="p-8 pt-6 text-center flex flex-col items-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                  className="w-16 h-16 rounded-full bg-gold/15 border-2 border-gold flex items-center justify-center text-gold mb-5"
+                >
+                  <CheckCircle2 size={32} />
+                </motion.div>
+                <h3 className="text-2xl font-bold text-ivory mb-2">Booking Request Sent!</h3>
+                <p className="text-sm text-ivory-dim mb-1">
+                  Thanks {data.name.trim().split(' ')[0] || 'friend'} — we&apos;ve received your request.
+                </p>
+                <p className="text-sm text-ivory-dim mb-6">
+                  Chat with us on WhatsApp to confirm your slot faster.
+                </p>
+                <a
+                  href={buildWhatsAppLink(data)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full max-w-sm py-4 rounded-lg bg-[#25D366] text-obsidian font-semibold text-xs tracking-widest uppercase flex items-center justify-center gap-2 mb-3"
+                >
+                  <MessageCircle size={16} /> Chat with us on WhatsApp
+                </a>
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="w-full max-w-sm py-3 rounded-lg border border-slate-light text-xs font-mono tracking-widest text-ivory-dim hover:text-gold transition-colors mb-3"
+                >
+                  ← Modify Booking Details
+                </button>
+                <button
+                  onClick={onClose}
+                  className="w-full max-w-sm py-3 rounded-lg bg-gold text-obsidian font-semibold text-xs tracking-widest uppercase"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

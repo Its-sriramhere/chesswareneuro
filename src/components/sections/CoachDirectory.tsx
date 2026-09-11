@@ -6,6 +6,24 @@ import CountUp from '../react-bits/CountUp'
 import { coaches } from '../../data/coaches'
 import { X, Star, GraduationCap, Trophy } from 'lucide-react'
 
+const InstagramIcon = ({ size = 14 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+)
+
 export default function CoachDirectory() {
   const [selected, setSelected] = useState<number | null>(null)
   const coach = coaches[0]
@@ -171,6 +189,14 @@ export default function CoachDirectory() {
                 ))}
               </ul>
             </div>
+            <a
+              href="https://www.instagram.com/suryakumaarchess/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full py-3 mb-3 rounded-lg border border-slate-light text-xs font-mono tracking-widest text-ivory-dim hover:border-gold hover:text-gold transition-colors flex items-center justify-center gap-2"
+            >
+              <InstagramIcon size={14} /> INSTAGRAM PROFILE
+            </a>
             <button
               onClick={() => {
                 setSelected(null)

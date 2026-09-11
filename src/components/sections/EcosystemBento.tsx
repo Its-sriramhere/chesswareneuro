@@ -5,7 +5,7 @@ import { GraduationCap, Cpu, Rocket, ArrowRight } from 'lucide-react'
 const ecosystem = [
   {
     id: '01',
-    title: 'CHESSWARE NEURO ACADEMY',
+    title: 'CHESSWARE NEURO PVT LTD',
     icon: <GraduationCap size={28} />,
     description: 'Personalized online chess coaching for a global audience.',
     action: 'EXPLORE',
