@@ -28,7 +28,7 @@ const socials = [
 
 const contact = {
   title: 'CONTACT',
-  email: 'chesswareneuropvttd@gmail.com',
+  email: 'chesswareneuropvtltd@gmail.com',
   phone: '+91 75981 11855',
 }
 

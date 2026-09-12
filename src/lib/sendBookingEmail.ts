@@ -15,7 +15,7 @@ export interface BookingEmailData {
   message?: string
 }
 
-const ENDPOINT = 'https://formsubmit.co/ajax/chesswareneuropvttd@gmail.com'
+const ENDPOINT = 'https://formsubmit.co/ajax/chesswareneuropvtltd@gmail.com'
 
 export async function sendBookingEmail(data: BookingEmailData): Promise<void> {
   const payload = {
